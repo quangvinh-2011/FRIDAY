@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FRIDAY — Trợ lý ảo của Quang Vinh</title>
+<meta name="description" content="FRIDAY, trợ lý ảo cá nhân: chat AI, quản lý việc cần làm, nhắc nhở và ghi chú." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="app">
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="friday-id">
+      <div class="orb" id="orb"><span class="orb-core"></span></div>
+      <div class="friday-text">
+        <div class="friday-name">FRIDAY</div>
+        <div class="friday-greeting" id="greeting">đang khởi động...</div>
+      </div>
+    </div>
+    <button class="icon-btn" id="settingsBtn" aria-label="Cài đặt">⚙</button>
+  </header>
+
+  <!-- Tabs -->
+  <nav class="tabbar" id="tabbar">
+    <button class="tab active" data-tab="chat"><span class="tab-ic">💬</span>Chat</button>
+    <button class="tab" data-tab="tasks"><span class="tab-ic">✅</span>Việc</button>
+    <button class="tab" data-tab="reminders"><span class="tab-ic">⏰</span>Nhắc</button>
+    <button class="tab" data-tab="notes"><span class="tab-ic">📝</span>Ghi chú</button>
+  </nav>
+
+  <!-- ===== CHAT PANEL ===== -->
+  <section class="panel active" id="panel-chat">
+    <div class="chat-window" id="chatWindow">
+      <div class="chat-intro" id="chatIntro"></div>
+    </div>
+    <form class="composer" id="composerForm">
+      <textarea id="messageInput" class="composer-input" placeholder="Nhắn gì đó cho FRIDAY nè..." rows="1"></textarea>
+      <button type="submit" class="send-btn" id="sendBtn" aria-label="Gửi">➤</button>
+    </form>
+  </section>
+
+  <!-- ===== TASKS PANEL ===== -->
+  <section class="panel" id="panel-tasks">
+    <div class="panel-header">
+      <h2>Việc cần làm</h2>
+      <span class="counter" id="taskCounter">0 việc</span>
+    </div>
+    <form class="quick-add" id="taskForm">
+      <input type="text" id="taskInput" placeholder="Thêm việc mới..." required />
+      <input type="date" id="taskDate" />
+      <button type="submit" class="add-btn">+</button>
+    </form>
+    <div class="list" id="taskList"></div>
+    <div class="empty-state" id="taskEmpty">
+      <div class="empty-emoji">🌤️</div>
+      <p>Chưa có việc gì cả, Cậu Chủ đang rảnh rang nè~</p>
+    </div>
+  </section>
+
+  <!-- ===== REMINDERS PANEL ===== -->
+  <section class="panel" id="panel-reminders">
+    <div class="panel-header">
+      <h2>Nhắc nhở</h2>
+      <span class="counter" id="reminderCounter">0 nhắc nhở</span>
+    </div>
+    <form class="quick-add" id="reminderForm">
+      <input type="text" id="reminderInput" placeholder="Nhắc tôi..." required />
+      <input type="datetime-local" id="reminderTime" required />
+      <button type="submit" class="add-btn">+</button>
+    </form>
+    <div class="list" id="reminderList"></div>
+    <div class="empty-state" id="reminderEmpty">
+      <div class="empty-emoji">🔔</div>
+      <p>Chưa có nhắc nhở nào. Đặt một cái để FRIDAY gọi Cậu Chủ nhé!</p>
+    </div>
+  </section>
+
+  <!-- ===== NOTES PANEL ===== -->
+  <section class="panel" id="panel-notes">
+    <div class="panel-header">
+      <h2>Ghi chú nhanh</h2>
+      <span class="counter" id="noteCounter">0 ghi chú</span>
+    </div>
+    <form class="quick-add quick-add-note" id="noteForm">
+      <textarea id="noteInput" placeholder="Viết gì đó để nhớ..." rows="2" required></textarea>
+      <button type="submit" class="add-btn">+ Lưu ghi chú</button>
+    </form>
+    <div class="list notes-grid" id="noteList"></div>
+    <div class="empty-state" id="noteEmpty">
+      <div class="empty-emoji">🗒️</div>
+      <p>Chưa có ghi chú nào cả.</p>
+    </div>
+  </section>
+
+</div>
+
+<!-- toast for reminders -->
+<div class="toast" id="reminderToast"></div>
+
+<!-- Settings modal -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-header">
+      <h2 id="modalTitle">Cài đặt FRIDAY</h2>
+      <button class="icon-btn" id="closeModalBtn" aria-label="Đóng">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <p class="modal-hint">
+        FRIDAY gọi API AI trực tiếp từ trình duyệt (chuẩn OpenAI Chat Completions).
+        API key chỉ lưu trong <code>localStorage</code> trên máy này, không bị lộ ra ngoài.
+      </p>
+
+      <label class="field">
+        <span class="field-label">Base URL</span>
+        <input type="text" id="baseUrlInput" placeholder="https://gen.pollinations.ai/v1" />
+      </label>
+
+      <label class="field">
+        <span class="field-label">API Key <em>(để trống nếu không cần)</em></span>
+        <input type="password" id="apiKeyInput" placeholder="sk-..." />
+      </label>
+
+      <label class="field">
+        <span class="field-label">Model</span>
+        <input type="text" id="modelInput" placeholder="openai" />
+      </label>
+
+      <hr class="divider" />
+
+      <label class="field">
+        <span class="field-label">Tên Cậu Chủ</span>
+        <input type="text" id="userNameInput" />
+      </label>
+
+      <label class="field">
+        <span class="field-label">Ngày sinh</span>
+        <input type="text" id="userDobInput" />
+      </label>
+
+      <label class="field">
+        <span class="field-label">Cung hoàng đạo</span>
+        <input type="text" id="userZodiacInput" />
+      </label>
+
+      <label class="field">
+        <span class="field-label">Trường / công việc</span>
+        <input type="text" id="userSchoolInput" />
+      </label>
+
+      <details class="providers-hint">
+        <summary>Gợi ý các API tương thích miễn phí / có phí</summary>
+        <ul>
+          <li><strong>Pollinations</strong> — <code>https://gen.pollinations.ai/v1</code> (key tại enter.pollinations.ai)</li>
+          <li><strong>OpenRouter</strong> — <code>https://openrouter.ai/api/v1</code> (có model free tier)</li>
+          <li><strong>Groq</strong> — <code>https://api.groq.com/openai/v1</code> (phản hồi rất nhanh)</li>
+          <li><strong>OpenAI</strong> — <code>https://api.openai.com/v1</code></li>
+        </ul>
+      </details>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-ghost" id="testConnBtn">Kiểm tra kết nối</button>
+      <button class="btn-primary" id="saveSettingsBtn">Lưu lại</button>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
