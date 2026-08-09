@@ -1,4 +1,4 @@
-# FRIDAY 🎀 — Trợ lý ảo cá nhân
+# FRIDAY 🎀 — Trợ lý ảo 
 
 Trợ lý ảo riêng của mình:
 
