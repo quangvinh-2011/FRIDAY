@@ -1,11 +1,11 @@
 'use strict';
-
+ 
 /* =========================================================
    FRIDAY — trợ lý ảo cá nhân
    Chat AI (OpenAI-compatible) + Việc cần làm + Nhắc nhở + Ghi chú
    Toàn bộ dữ liệu lưu trong localStorage, chạy 100% phía client.
    ========================================================= */
-
+ 
 const KEYS = {
   settings: 'friday_settings_v1',
   profile: 'friday_profile_v1',
@@ -14,20 +14,20 @@ const KEYS = {
   reminders: 'friday_reminders_v1',
   notes: 'friday_notes_v1',
 };
-
+ 
 const DEFAULT_SETTINGS = {
   baseUrl: 'https://gen.pollinations.ai/v1',
   apiKey: '',
   model: 'openai',
 };
-
+ 
 const DEFAULT_PROFILE = {
   userName: 'Quang Vinh',
   dob: '20/11/2000',
   zodiac: 'Thiên Yết (Scorpio)',
   school: 'Đại học Quốc Tế (IU) - ĐHQG TP.HCM',
 };
-
+ 
 /* ---------------- state ---------------- */
 let settings = load(KEYS.settings, DEFAULT_SETTINGS);
 let profile = load(KEYS.profile, DEFAULT_PROFILE);
@@ -36,40 +36,38 @@ let tasks = load(KEYS.tasks, []);
 let reminders = load(KEYS.reminders, []);
 let notes = load(KEYS.notes, []);
 let isSending = false;
-
+ 
 /* ---------------- dom ---------------- */
 const $ = (id) => document.getElementById(id);
 const orb = $('orb');
 const greeting = $('greeting');
-
+ 
 /* ---------------- init ---------------- */
-init();
-
 function init() {
   renderGreeting();
   setInterval(renderGreeting, 60000);
-
+ 
   setupTabs();
   setupChat();
   setupTasks();
   setupReminders();
   setupNotes();
   setupSettingsModal();
-
+ 
   renderChatIntro();
   renderTasks();
   renderReminders();
   renderNotes();
-
+ 
   requestNotifPermission();
   setInterval(checkDueReminders, 20000);
   checkDueReminders();
-
+ 
   if (!settings.baseUrl) {
     setTimeout(openSettings, 400);
   }
 }
-
+ 
 /* ---------------- storage helpers ---------------- */
 function load(key, fallback) {
   try {
@@ -84,7 +82,7 @@ function load(key, fallback) {
 function save(key, value) {
   localStorage.setItem(key, JSON.stringify(value));
 }
-
+ 
 /* ---------------- greeting ---------------- */
 function renderGreeting() {
   const h = new Date().getHours();
@@ -97,7 +95,7 @@ function renderGreeting() {
   else text = 'Khuya rồi đó Cậu Chủ ơi, ngủ sớm nha 😴';
   greeting.textContent = text;
 }
-
+ 
 /* ---------------- tabs ---------------- */
 function setupTabs() {
   const tabs = document.querySelectorAll('.tab');
@@ -110,7 +108,7 @@ function setupTabs() {
     });
   });
 }
-
+ 
 /* =========================================================
    CHAT
    ========================================================= */
@@ -119,7 +117,7 @@ const chatIntro = $('chatIntro');
 const composerForm = $('composerForm');
 const messageInput = $('messageInput');
 const sendBtn = $('sendBtn');
-
+ 
 function setupChat() {
   composerForm.addEventListener('submit', onSubmitMessage);
   messageInput.addEventListener('keydown', (e) => {
@@ -134,13 +132,13 @@ function setupChat() {
   });
   renderChatMessages();
 }
-
+ 
 function renderChatIntro() {
   chatIntro.innerHTML =
     `Hiii, FRIDAY đây! 🎀 Là trợ lý ảo riêng của <b>Cậu Chủ ${escapeHtml(profile.userName)}</b>. ` +
     `Cứ nhắn gì cũng được — hỏi bài, tám chuyện, nhờ FRIDAY nhắc việc đều oke hết á. Bắt đầu chat thử xem nào~`;
 }
-
+ 
 function renderChatMessages() {
   chatWindow.querySelectorAll('.msg').forEach((el) => el.remove());
   for (const msg of chatMessages) {
@@ -148,7 +146,7 @@ function renderChatMessages() {
   }
   scrollChatToBottom();
 }
-
+ 
 function buildMessageEl(msg) {
   const wrap = document.createElement('div');
   wrap.className = `msg ${msg.role === 'user' ? 'user' : msg.role === 'error' ? 'error' : 'bot'}`;
@@ -162,17 +160,17 @@ function buildMessageEl(msg) {
   wrap.appendChild(bubble);
   return wrap;
 }
-
+ 
 async function onSubmitMessage(e) {
   e.preventDefault();
   const text = messageInput.value.trim();
   if (!text || isSending) return;
-
+ 
   if (!settings.baseUrl) {
     openSettings();
     return;
   }
-
+ 
   chatMessages.push({ role: 'user', content: text });
   save(KEYS.chat, chatMessages);
   renderChatMessages();
@@ -180,11 +178,11 @@ async function onSubmitMessage(e) {
   messageInput.style.height = 'auto';
   setSending(true);
   orb.classList.add('thinking');
-
+ 
   const typingEl = buildTypingEl();
   chatWindow.appendChild(typingEl);
   scrollChatToBottom();
-
+ 
   try {
     const apiMessages = buildApiMessages();
     const reply = await callChatAPI(settings, apiMessages);
@@ -200,14 +198,14 @@ async function onSubmitMessage(e) {
     renderChatMessages();
   }
 }
-
+ 
 function buildSystemPrompt() {
   const pendingTasks = tasks.filter((t) => !t.done);
   const upcomingReminders = reminders
     .filter((r) => new Date(r.datetime).getTime() > Date.now())
     .sort((a, b) => new Date(a.datetime) - new Date(b.datetime))
     .slice(0, 3);
-
+ 
   let ctx = '';
   if (pendingTasks.length) {
     ctx += `\nViệc đang chưa xong của Cậu Chủ: ${pendingTasks.slice(0, 6).map((t) => t.text).join('; ')}.`;
@@ -215,7 +213,7 @@ function buildSystemPrompt() {
   if (upcomingReminders.length) {
     ctx += `\nNhắc nhở sắp tới: ${upcomingReminders.map((r) => `"${r.text}" lúc ${formatDateTime(r.datetime)}`).join('; ')}.`;
   }
-
+ 
   return (
     `Bạn tên là FRIDAY, một trợ lý ảo cá nhân dễ thương, thân thiện, nói chuyện theo phong cách genz Việt Nam ` +
     `(dùng từ ngữ tự nhiên, thoải mái, thỉnh thoảng chêm icon/từ lóng nhẹ nhàng, nhưng vẫn lịch sự, không thô tục). ` +
@@ -226,7 +224,7 @@ function buildSystemPrompt() {
     ctx
   );
 }
-
+ 
 function buildApiMessages() {
   const msgs = [{ role: 'system', content: buildSystemPrompt() }];
   for (const m of chatMessages) {
@@ -234,14 +232,14 @@ function buildApiMessages() {
   }
   return msgs;
 }
-
+ 
 function buildTypingEl() {
   const wrap = document.createElement('div');
   wrap.className = 'msg bot';
   wrap.innerHTML = `<div class="msg-label">FRIDAY</div><div class="bubble typing"><span></span><span></span><span></span></div>`;
   return wrap;
 }
-
+ 
 function setSending(v) {
   isSending = v;
   sendBtn.disabled = v;
@@ -249,19 +247,19 @@ function setSending(v) {
 function scrollChatToBottom() {
   chatWindow.scrollTop = chatWindow.scrollHeight;
 }
-
+ 
 /* ---------------- API call ---------------- */
 async function callChatAPI(cfg, messages) {
   const url = `${cfg.baseUrl}/chat/completions`;
   const headers = { 'Content-Type': 'application/json' };
   if (cfg.apiKey) headers['Authorization'] = `Bearer ${cfg.apiKey}`;
-
+ 
   const res = await fetch(url, {
     method: 'POST',
     headers,
     body: JSON.stringify({ model: cfg.model || 'openai', messages, temperature: 0.9 }),
   });
-
+ 
   if (!res.ok) {
     let detail = '';
     try {
@@ -272,18 +270,18 @@ async function callChatAPI(cfg, messages) {
     }
     throw new Error(`HTTP ${res.status}${detail ? ' — ' + detail : ''}`);
   }
-
+ 
   const data = await res.json();
   const content = data?.choices?.[0]?.message?.content;
   if (!content) throw new Error('Phản hồi API không hợp lệ.');
   return content;
 }
-
+ 
 function shortError(err) {
   const msg = err?.message || String(err);
   return msg.length > 140 ? msg.slice(0, 140) + '…' : msg;
 }
-
+ 
 /* ---------------- markdown-lite ---------------- */
 function escapeHtml(str) {
   return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -296,7 +294,7 @@ function renderMarkdownLite(raw) {
   text = text.replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g, '<em>$1</em>');
   return text;
 }
-
+ 
 /* =========================================================
    TASKS
    ========================================================= */
@@ -314,7 +312,7 @@ function setupTasks() {
     renderTasks();
   });
 }
-
+ 
 function renderTasks() {
   const list = $('taskList');
   const empty = $('taskEmpty');
@@ -322,13 +320,13 @@ function renderTasks() {
   list.innerHTML = '';
   const pending = tasks.filter((t) => !t.done).length;
   counter.textContent = `${pending} việc chưa xong`;
-
+ 
   if (!tasks.length) {
     empty.classList.add('show');
     return;
   }
   empty.classList.remove('show');
-
+ 
   const sorted = [...tasks].sort((a, b) => a.done - b.done);
   for (const t of sorted) {
     const el = document.createElement('div');
@@ -348,7 +346,7 @@ function renderTasks() {
     list.appendChild(el);
   }
 }
-
+ 
 function toggleTask(id) {
   const t = tasks.find((x) => x.id === id);
   if (t) t.done = !t.done;
@@ -364,7 +362,7 @@ function isOverdue(dateStr) {
   const d = new Date(dateStr + 'T23:59:59');
   return d.getTime() < Date.now();
 }
-
+ 
 /* =========================================================
    REMINDERS
    ========================================================= */
@@ -382,7 +380,7 @@ function setupReminders() {
     renderReminders();
   });
 }
-
+ 
 function renderReminders() {
   const list = $('reminderList');
   const empty = $('reminderEmpty');
@@ -390,13 +388,13 @@ function renderReminders() {
   list.innerHTML = '';
   const upcoming = reminders.filter((r) => new Date(r.datetime).getTime() > Date.now()).length;
   counter.textContent = `${upcoming} sắp tới`;
-
+ 
   if (!reminders.length) {
     empty.classList.add('show');
     return;
   }
   empty.classList.remove('show');
-
+ 
   const sorted = [...reminders].sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
   for (const r of sorted) {
     const passed = new Date(r.datetime).getTime() < Date.now();
@@ -414,13 +412,13 @@ function renderReminders() {
     list.appendChild(el);
   }
 }
-
+ 
 function deleteReminder(id) {
   reminders = reminders.filter((x) => x.id !== id);
   save(KEYS.reminders, reminders);
   renderReminders();
 }
-
+ 
 function checkDueReminders() {
   const now = Date.now();
   let changed = false;
@@ -436,7 +434,7 @@ function checkDueReminders() {
     renderReminders();
   }
 }
-
+ 
 function fireReminder(r) {
   showToast(`⏰ FRIDAY nhắc Cậu Chủ: ${r.text}`);
   chatMessages.push({ role: 'assistant', content: `⏰ Đến giờ rồi nè Cậu Chủ ${profile.userName} ơi: **${r.text}**` });
@@ -446,26 +444,26 @@ function fireReminder(r) {
     new Notification('FRIDAY nhắc Cậu Chủ', { body: r.text });
   }
 }
-
+ 
 function requestNotifPermission() {
   if (window.Notification && Notification.permission === 'default') {
     Notification.requestPermission().catch(() => {});
   }
 }
-
+ 
 function formatDateTime(val) {
   const d = new Date(val);
   if (isNaN(d)) return val;
   return d.toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
-
+ 
 function showToast(text) {
   const toast = $('reminderToast');
   toast.textContent = text;
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 5000);
 }
-
+ 
 /* =========================================================
    NOTES
    ========================================================= */
@@ -481,20 +479,20 @@ function setupNotes() {
     renderNotes();
   });
 }
-
+ 
 function renderNotes() {
   const list = $('noteList');
   const empty = $('noteEmpty');
   const counter = $('noteCounter');
   list.innerHTML = '';
   counter.textContent = `${notes.length} ghi chú`;
-
+ 
   if (!notes.length) {
     empty.classList.add('show');
     return;
   }
   empty.classList.remove('show');
-
+ 
   for (const n of notes) {
     const el = document.createElement('div');
     el.className = 'item';
@@ -510,13 +508,13 @@ function renderNotes() {
     list.appendChild(el);
   }
 }
-
+ 
 function deleteNote(id) {
   notes = notes.filter((x) => x.id !== id);
   save(KEYS.notes, notes);
   renderNotes();
 }
-
+ 
 /* =========================================================
    SETTINGS MODAL
    ========================================================= */
@@ -529,7 +527,7 @@ function setupSettingsModal() {
   $('saveSettingsBtn').addEventListener('click', saveSettingsFromModal);
   $('testConnBtn').addEventListener('click', testConnection);
 }
-
+ 
 function openSettings() {
   $('baseUrlInput').value = settings.baseUrl;
   $('apiKeyInput').value = settings.apiKey;
@@ -543,23 +541,23 @@ function openSettings() {
 function closeSettings() {
   $('modalBackdrop').classList.remove('open');
 }
-
+ 
 function saveSettingsFromModal() {
   settings.baseUrl = $('baseUrlInput').value.trim().replace(/\/+$/, '');
   settings.apiKey = $('apiKeyInput').value.trim();
   settings.model = $('modelInput').value.trim() || 'openai';
   save(KEYS.settings, settings);
-
+ 
   profile.userName = $('userNameInput').value.trim() || DEFAULT_PROFILE.userName;
   profile.dob = $('userDobInput').value.trim();
   profile.zodiac = $('userZodiacInput').value.trim();
   profile.school = $('userSchoolInput').value.trim();
   save(KEYS.profile, profile);
-
+ 
   renderChatIntro();
   closeSettings();
 }
-
+ 
 async function testConnection() {
   const btn = $('testConnBtn');
   const original = btn.textContent;
@@ -582,8 +580,11 @@ async function testConnection() {
     setTimeout(() => (btn.textContent = original), 2600);
   }
 }
-
+ 
 /* ---------------- util ---------------- */
 function uid() {
   return 'id_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 }
+ 
+/* ---------------- boot ---------------- */
+init();
