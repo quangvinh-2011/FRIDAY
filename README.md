@@ -61,4 +61,4 @@ friday-assistant/
 - [ ] Đồng bộ dữ liệu qua nhiều thiết bị (hiện chỉ lưu local)
 
 ---
-Made with 🎀 as a portfolio project.
+Cảm ơn đã đọc 🎀
