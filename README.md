@@ -2,7 +2,7 @@
 
 Trợ lý ảo riêng của Quang Vinh: chat AI dễ thương phong cách genz, quản lý việc cần làm, đặt nhắc nhở và ghi chú nhanh — tất cả trong một web app chạy hoàn toàn phía trình duyệt, không cần backend.
 
-🔗 **Demo:** bật GitHub Pages cho repo này rồi dán link vào đây.
+🔗 **Demo:** https://quangvinh-2011.github.io/FRIDAY/.
 
 ## Tính năng
 
