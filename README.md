@@ -1,6 +1,6 @@
 # FRIDAY 🎀 — Trợ lý ảo cá nhân
 
-Trợ lý ảo riêng của Quang Vinh: chat AI dễ thương phong cách genz, quản lý việc cần làm, đặt nhắc nhở và ghi chú nhanh — tất cả trong một web app chạy hoàn toàn phía trình duyệt, không cần backend.
+Trợ lý ảo riêng của mình:
 
 🔗 **Demo:** https://quangvinh-2011.github.io/FRIDAY/.
 
@@ -11,37 +11,19 @@ Trợ lý ảo riêng của Quang Vinh: chat AI dễ thương phong cách genz, 
 - ⏰ **Nhắc nhở** — đặt giờ, khi tới giờ FRIDAY tự nhắn tin nhắc trong khung chat + hiện toast + gửi Notification trình duyệt (nếu được cấp quyền).
 - 📝 **Ghi chú nhanh** — lưu ý nghĩ, thông tin cần nhớ.
 - 💾 Toàn bộ dữ liệu lưu trong `localStorage` — không cần đăng nhập, không mất dữ liệu khi tắt/mở lại trình duyệt trên cùng một máy.
-- 🎨 Giao diện "mood orb" xoay màu, theme genz hồng-pastel trên nền tối, có lời chào tự động đổi theo giờ trong ngày.
 
-## Công nghệ
+## 🛠️ Tech Stack
 
-Vanilla **HTML / CSS / JavaScript**, không framework. Toàn bộ state, gọi API, lưu trữ local đều viết tay để thể hiện hiểu biết nền tảng: DOM, `fetch`/`async-await`, Web Storage API, Notification API.
+Dự án viết hoàn toàn bằng **Vanilla HTML5, CSS3, và JavaScript (ES6+)** – không sử dụng framework, thể hiện nền tảng lập trình vững chắc:
+* **DOM Manipulation & State Management** viết tay.
+* **Web APIs:** `Fetch API` (`async/await`), `Web Storage API`, và `Notification API`.
+* **UI/UX:** Thiết kế responsive, giao diện pastel hiện đại với hiệu ứng động mượt mà.
 
-## Chạy thử
+## ✨ Điểm nổi bật & Tính năng
 
-```bash
-npx serve .
-# hoặc
-python3 -m http.server 8080
-```
-
-Mở trình duyệt tới địa chỉ local server hiện ra là dùng được ngay.
-
-## Cấu hình API key
-
-FRIDAY gọi thẳng API AI từ trình duyệt (bấm nút ⚙ **Cài đặt**), nên đây là ứng dụng client-side thuần — không có backend để giấu key hoàn toàn. Vì vậy:
-
-- Key chỉ được lưu trong `localStorage` của máy bạn, **không** commit vào GitHub.
-- Muốn public demo an toàn cho người khác dùng, nên thêm một backend nhỏ (Cloudflare Worker / Node) làm proxy giấu key — hướng phát triển tiếp theo.
-
-Một vài API tương thích OpenAI có thể dùng:
-
-| Provider | Base URL | Ghi chú |
-|---|---|---|
-| Pollinations | `https://gen.pollinations.ai/v1` | có model miễn phí, key tại enter.pollinations.ai |
-| OpenRouter | `https://openrouter.ai/api/v1` | có nhiều model free tier |
-| Groq | `https://api.groq.com/openai/v1` | tốc độ phản hồi rất nhanh |
-| OpenAI | `https://api.openai.com/v1` | trả phí |
+* **AI Companion có ngữ cảnh:** Tích hợp API chuẩn OpenAI, hỗ trợ ghi nhớ thông tin cá nhân, ngữ cảnh trò chuyện và quản lý lịch trình.
+* **All-in-One Productivity:** Quản lý **Việc cần làm** (có hạn chót/cảnh báo), **Nhắc nhở** (Browser Notification + Toast) và **Ghi chú nhanh**.
+* **Zero-Backend & Local-First:** Toàn bộ dữ liệu vận hành qua `localStorage` – nhanh chóng, riêng tư, không cần đăng ký tài khoản.
 
 ## Cấu trúc project
 
