@@ -6,7 +6,7 @@ Trợ lý ảo riêng của mình:
 
 ## Tính năng
 
-- 💬 **Chat với FRIDAY** — gọi API AI tương thích chuẩn OpenAI, có tính cách riêng: gọi bạn là "Cậu Chủ", nói chuyện genz dễ thương, biết ngày sinh / cung hoàng đạo / trường của bạn để trả lời tự nhiên hơn. FRIDAY còn biết việc đang dang dở và nhắc nhở sắp tới để trò chuyện có ngữ cảnh.
+- 💬 **Chat với FRIDAY** — gọi API AI tương thích chuẩn OpenAI, có tính cách riêng.
 - ✅ **Việc cần làm** — thêm/xoá/đánh dấu hoàn thành, có hạn chót, cảnh báo quá hạn.
 - ⏰ **Nhắc nhở** — đặt giờ, khi tới giờ FRIDAY tự nhắn tin nhắc trong khung chat + hiện toast + gửi Notification trình duyệt (nếu được cấp quyền).
 - 📝 **Ghi chú nhanh** — lưu ý nghĩ, thông tin cần nhớ.
