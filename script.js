@@ -15,10 +15,16 @@ const KEYS = {
   notes: 'friday_notes_v1',
 };
  
+// Mặc định FRIDAY gọi qua "trạm trung chuyển" (Cloudflare Worker) do Quang Vinh
+// tự host — nơi giữ API key bí mật, để bất kỳ ai mở trang cũng chat được ngay
+// mà không cần tự nhập key riêng. Đổi URL bên dưới thành URL Worker của bạn
+// sau khi deploy (xem HUONG_DAN_DEPLOY.md).
+const PUBLIC_PROXY_URL = 'https://friday-proxy.vquang55.workers.dev/';
+ 
 const DEFAULT_SETTINGS = {
-  baseUrl: 'https://gen.pollinations.ai/v1',
+  baseUrl: PUBLIC_PROXY_URL,
   apiKey: '',
-  model: 'openai',
+  model: 'openrouter/free',
 };
  
 const DEFAULT_PROFILE = {
@@ -588,3 +594,4 @@ function uid() {
  
 /* ---------------- boot ---------------- */
 init();
+ 
